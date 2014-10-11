@@ -11,7 +11,6 @@
 #define UNSTABLE_STATE  1
 #define STATE_CHANGED   3
 
-
 Bounce::Bounce()
     : previous_millis(0)
     , interval_millis(10)
@@ -40,8 +39,9 @@ void Bounce::interval(uint16_t interval_millis)
 
 bool Bounce::update()
 {
-#ifdef BOUNCE_LOCK_OUT
     state &= ~_BV(STATE_CHANGED);
+
+#ifdef BONUCE_LOCK_OUT
     // Ignore everything if we are locked out
     if (millis() - previous_millis >= interval_millis) {
         bool currentState = digitalRead(pin);
@@ -51,11 +51,9 @@ bool Bounce::update()
             state |= _BV(STATE_CHANGED);
         }
     }
-    return state & _BV(STATE_CHANGED);
 #else
     // Read the state of the switch in a temporary variable.
     bool currentState = digitalRead(pin);
-    state &= ~_BV(STATE_CHANGED);
 
     // If the reading is different from last reading, reset the debounce counter
     if ( currentState != (bool)(state & _BV(UNSTABLE_STATE)) ) {
@@ -71,9 +69,9 @@ bool Bounce::update()
                 state |= _BV(STATE_CHANGED);
             }
         }
+#endif
 
     return state & _BV(STATE_CHANGED);
-#endif
 }
 
 bool Bounce::read()
